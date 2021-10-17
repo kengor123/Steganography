@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable name="vm" type="comp.proj.painter.ui.embed.EmbedViewModel"/>
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.embed.EmbedTextFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="67dp"
+            android:text="Input your secret message and password:"
+            android:textSize="20dp" />
+
+        <EditText
+            android:id="@+id/secretMsg"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="@string/your_message"
+            android:text="@={vm.secretMsg}"
+            android:ems="10" />
+
+        <EditText
+            android:id="@+id/setpw"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="@string/set_a_password"
+            android:text= "@={vm.password}"
+            android:ems="10" />
+
+        <Button
+            android:id="@+id/button_submit"
+            android:layout_width="183dp"
+            android:layout_height="47dp"
+            android:text="Embed" />
+
+        <ImageView
+            android:id="@+id/coverImage"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            app:imageUrl="@{vm.imageUrl}"
+            android:layout_height="wrap_content"
+            tools:src="@tools:sample/avatars" />
+
+        <Button
+            android:id="@+id/button_share"
+            android:layout_width="179dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="Share" />
+
+
+        <include
+            android:id="@+id/llProgressBar"
+            android:visibility="gone"
+            layout="@layout/layout_progress_bar"/>
+<!--        <ProgressBar-->
+<!--            android:id="@+id/progress_loader"-->
+<!--            style="?android:attr/progressBarStyle"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_centerInParent="true"-->
+<!--            android:visibility="gone" />-->
+
+
+    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_embed">
+
+    <fragment
+        android:id="@+id/navigation_embed"
+        android:name="comp.proj.painter.ui.embed.EmbedFragment"
+        android:label="Embed"
+        tools:layout="@layout/fragment_embed" >
+        <action
+            android:id="@+id/action_navigation_embed_to_navigation_embed_text"
+            app:destination="@id/navigation_embed_text" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_extract"
+        android:name="comp.proj.painter.ui.extract.ExtractFragment"
+        android:label="Extract"
+        tools:layout="@layout/fragment_extract" />
+
+    <fragment
+        android:id="@+id/navigation_embed_text"
+        android:name="comp.proj.painter.ui.embed.EmbedTextFragment"
+        android:label="TextEmbed"
+        tools:layout="@layout/fragment_embed_text" />
+
+</navigation>

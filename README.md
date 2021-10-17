@@ -1,6 +1,6 @@
 ﻿
 # JPEG Steganography app for Android
- It is a Final Year Project by Ken Fu (2021).
+ This is a Final Year Project by Ken Fu (2021).
 
 ## Installation
 - Download Android Studio
@@ -11,7 +11,7 @@
 - Run your VM/phone to open the app
 
 ## Instruction
-- The app contains two functions: Embed and Extract
+- This app contains two functions: Embed and Extract
 	- **Embed**: Add secret message into the cover image
 	- A **password** (set by user)  is required to encrypt the message
 	- **Extract**: Get back the message with the valid password

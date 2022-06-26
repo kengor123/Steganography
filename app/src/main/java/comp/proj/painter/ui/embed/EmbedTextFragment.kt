@@ -1,6 +1,7 @@
 package comp.proj.painter.ui.embed
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -30,6 +31,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
+import java.security.spec.InvalidKeySpecException
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
@@ -56,7 +58,7 @@ class EmbedTextFragment : Fragment() {
 
     private lateinit var embedViewModel: EmbedViewModel
     lateinit var binding: FragmentEmbedTextBinding
-    lateinit var shareUri:Uri
+    lateinit var shareUri: Uri
 
     val waitChannel = Channel<Boolean>()
 
@@ -126,55 +128,55 @@ class EmbedTextFragment : Fragment() {
             val out = requireContext().contentResolver.openOutputStream(uri)
             Log.e("EmbedTextFrag", "out")
 
-            arguments?.let { value ->
-                val bitmap = value.get("coverImage") as Bitmap
-                Log.e("EmbedTextFrag", "imgURL = ${bitmap}")
-                Log.e("EmbedTextFrag", "${binding.coverImage.drawable}")
-                if (bitmap == null) {
+            if (msg == null) {
+                CoroutineScope(Dispatchers.Main).launch {
                     Log.e("EmbedTextFrag", "fail")
                     requireActivity().runOnUiThread {
                         Toast.makeText(
                             activity,
-                            "Please select cover image first",
+                            "Please select input message first",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    return
+                }
+                return
+            }
 
-                } else {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val jpegEncoder = JpegEncoder(
-                            bitmap, 90, out, msg?.let { encryptedString(it) }
-                        )
+            arguments?.let { value ->
+                val bitmap = value.get("coverImage") as Bitmap
+                Log.e("EmbedTextFrag", "imgURL = ${bitmap}")
+                Log.e("EmbedTextFrag", "${binding.coverImage.drawable}")
 
-                        Log.e("EmbedTextFrag", "call encoder")
-                        jpegEncoder.Compress();
+                CoroutineScope(Dispatchers.IO).launch {
+                    val jpegEncoder = JpegEncoder(
+                        bitmap, 90, out, msg?.let { encryptedString(it) }
+                    )
 
-//                    requireActivity().runOnUiThread {
-//
-//                    }
-                        Log.e("EmbedTextFrag", "encoded")
+                    Log.e("EmbedTextFrag", "call encoder")
+                    jpegEncoder.Compress();
 
-                        out?.close()
+                    Log.e("EmbedTextFrag", "encoded")
 
-                        waitChannel.send(true)
+                    out?.close()
 
-                        val sendIntent: Intent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            type = "image/jpg"
-                        }
+                    waitChannel.send(true)
+
+                    val sendIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_STREAM, uri)
+                        type = "image/jpg"
+                    }
 
 //                        val shareIntent = Intent.createChooser(sendIntent, null)
 //                        startActivity(Intent.createChooser(shareIntent, "Share Image"))
 
-                    }
-
                 }
 
-
             }
+
+
         }
+
         shareUri = uri
     }
 
@@ -232,31 +234,48 @@ class EmbedTextFragment : Fragment() {
                 )
     }
 
-    private fun encryptedString(msgToEncrypt: String):String{
+    private fun encryptedString(msgToEncrypt: String): String {
         binding.vm?.password?.value.let { pw ->
-            val salt = ByteArray(256)
-            salt.fill(0);
+            try {
+                val salt = ByteArray(256)
+                salt.fill(0);
 
-            val password = pw?.toCharArray()
-            val pbKeySpec = PBEKeySpec(password, salt, 1324, 256) // 1
-            val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1") // 2
-            val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded // 3
-            val keySpec = SecretKeySpec(keyBytes, "AES") // 4
+                val password = pw?.toCharArray()
 
-            val iv = ByteArray(16)
-            iv.fill(1)
-            val ivSpec = IvParameterSpec(iv) // 2
+                val pbKeySpec = PBEKeySpec(password, salt, 1324, 256) // 1
+                val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1") // 2
+                val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded // 3
+                val keySpec = SecretKeySpec(keyBytes, "AES") // 4
 
-            val data: ByteArray = msgToEncrypt.toByteArray(StandardCharsets.UTF_8)
+                val iv = ByteArray(16)
+                iv.fill(1)
+                val ivSpec = IvParameterSpec(iv) // 2
 
-            val cipher = Cipher.getInstance("AES/CTR/NoPadding") // 1
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
-            val encrypted = cipher.doFinal(data) // 2
+                val data: ByteArray = msgToEncrypt.toByteArray(StandardCharsets.UTF_8)
 
-            val base64: String = Base64.encodeToString(encrypted, Base64.DEFAULT)
+                val cipher = Cipher.getInstance("AES/CTR/NoPadding") // 1
+                cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
+                val encrypted = cipher.doFinal(data) // 2
 
-            Log.e("Encrypt", "${base64}")
-            return base64
+                val base64: String = Base64.encodeToString(encrypted, Base64.DEFAULT)
+
+                Log.e("Encrypt", "${base64}")
+                return base64
+            } catch (e: InvalidKeySpecException) {
+
+                requireActivity().runOnUiThread {
+                    Toast.makeText(
+                        activity,
+                        "Please select cover image first",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                val builder = AlertDialog.Builder(context)
+
+                val alertDialog = builder.create()
+                alertDialog.show()
+            }
+            return "";
         }
     }
 
@@ -264,7 +283,10 @@ class EmbedTextFragment : Fragment() {
     private fun uri(): Uri {
         val contentValue = ContentValues()
 
-        contentValue.put(MediaStore.MediaColumns.DISPLAY_NAME, "${Date().time}.jpg");       //file name
+        contentValue.put(
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            "${Date().time}.jpg"
+        );       //file name
         contentValue.put(
             MediaStore.MediaColumns.MIME_TYPE,
             "image/jpeg"

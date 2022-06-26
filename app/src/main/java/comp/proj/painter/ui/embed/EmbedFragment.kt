@@ -24,13 +24,16 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import comp.proj.painter.R
 import comp.proj.painter.databinding.FragmentEmbedBinding
 import comp.proj.painter.ui.code.JpegEncoder
 import comp.proj.painter.ui.data.Code
 import kotlinx.android.synthetic.main.fragment_embed.*
+import kotlinx.android.synthetic.main.fragment_embed_text.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.nio.charset.StandardCharsets
@@ -66,33 +69,59 @@ class EmbedFragment : Fragment() {
             startActivityForResult(mediaIntent, Code.IMAGE_RESULT)
         }
 
-        binding.buttonEmbed.setOnClickListener {
-            val strings = arrayOf( "embed text")
-
-            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-            builder.setSingleChoiceItems(strings, 0,
-                DialogInterface.OnClickListener { dialog, which ->
-                    when (which) {
-                        0 -> {
-//                            text_embed.visibility = View.VISIBLE;
-//                            button_encode.visibility = View.VISIBLE;
-                            binding.imageView.drawable.let { image ->
-                                findNavController().navigate(
-                                    R.id.action_navigation_embed_to_navigation_embed_text,
-                                    bundleOf(Pair("coverImage", image.toBitmap()))
-                                )
-                                Log.e("EmbedFrag", "${image.toBitmap()}")
-                            }
-                            dialog.dismiss() //結束對話框
-                        }
-
-                    }
-
-                })
-            builder.show()
-        }
-
+//        binding.buttonEmbed.setOnClickListener {
+//            val strings = arrayOf("embed text")
+//
+//            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+//            builder.setSingleChoiceItems(strings, 0,
+//                DialogInterface.OnClickListener { dialog, which ->
+//                    when (which) {
+//                        0 -> {
+////                            text_embed.visibility = View.VISIBLE;
+////                            button_encode.visibility = View.VISIBLE;
+//                            binding.imageView.drawable.let { image ->
+//                                if (image == null) {
+//                                    Log.e("EmbedFrag", "image not exist")
+//                                } else {
+//                                    findNavController().navigate(
+//                                        R.id.action_navigation_embed_to_navigation_embed_text,
+//                                        bundleOf(Pair("coverImage", image.toBitmap()))
+//                                    )
+//                                    Log.e("EmbedFrag", "${image.toBitmap()}")
+//                                }
+//                            }
+//                            dialog.dismiss() //結束對話框
+//                        }
+//
+//                    }
+//
+//                })
+//            builder.show()
+//        }
+        navToEmbedMsg()
         return binding.root
+    }
+
+    fun navToEmbedMsg(){
+        binding.buttonEmbed.setOnClickListener {
+            val imageNotFoundMsg = "Please select image first"
+
+            binding.imageView.drawable.let { image ->
+                if (image == null) {
+                    Log.e("EmbedFrag", "image not exist")
+                    requireActivity().runOnUiThread {
+                        Snackbar.make( imageView ,imageNotFoundMsg, Snackbar.LENGTH_LONG).show()
+                    }
+                } else {
+                    findNavController().navigate(
+                        R.id.action_navigation_embed_to_navigation_embed_text,
+                        bundleOf(Pair("coverImage", image.toBitmap()))
+                    )
+                    Log.e("EmbedFrag", "${image.toBitmap()}")
+                }
+            }
+
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -143,7 +172,6 @@ class EmbedFragment : Fragment() {
             Log.e("EmbedFrag", "PERMISSION GRANTED")
         }
     }
-
 
 
 }

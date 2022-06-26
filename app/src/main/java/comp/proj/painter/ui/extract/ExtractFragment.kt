@@ -54,20 +54,12 @@ class ExtractFragment : Fragment() {
         }
 
         binding.buttonExtract.setOnClickListener {
-//            findNavController().navigate(
-//                R.id.action_navigation_extract_to_navigation_show_message
-//            )
-
-//            inputPassword()
-//            decode()
 
             CoroutineScope(Dispatchers.IO).launch {
                 val text = inputPassword()
                 decode()
             }
-//            CoroutineScope(Dispatchers.IO).launch{
-//            }
-            //}
+
 
         }
         return binding.root
@@ -129,29 +121,4 @@ class ExtractFragment : Fragment() {
         }
     }
 
-//    private fun decrypt(encrypted: ByteArray) {// 1
-////        val random = SecureRandom()
-//        val salt = ByteArray(256)
-//        salt.fill(0);
-//        val password = charArrayOf('0')
-//        val pbKeySpec = PBEKeySpec(password, salt, 1324, 256) // 1
-//        val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1") // 2
-//        val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded // 3
-//        val keySpec = SecretKeySpec(keyBytes, "AES") // 4
-////        val ivRandom = SecureRandom() //not caching previous seeded instance of SecureRandom
-//// 1
-//        val iv = ByteArray(16)
-////        ivRandom.nextBytes(iv)
-//        iv.fill(1)
-//        val ivSpec = IvParameterSpec(iv) // 2
-//
-//        val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding") // 1
-//
-//// 2
-////regenerate key from password
-//        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec)
-//        //val encrypted = ByteArray(12)
-//        val decrypted = cipher.doFinal(encrypted)
-//        Log.e("Decrypt", "${String(decrypted)}")
-//    }
 }

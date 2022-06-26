@@ -1,7 +1,10 @@
 package comp.proj.painter
 
+
+import androidx.test.core.app.ActivityScenario.*
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import comp.proj.painter.ui.embed.EmbedFragment
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,4 +24,7 @@ class ExampleInstrumentedTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("comp.proj.painter", appContext.packageName)
     }
+
+
+
 }

@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import comp.proj.painter.databinding.FragmentEmbedTextBinding
 import comp.proj.painter.ui.code.JpegEncoder
+import kotlinx.android.synthetic.main.fragment_embed.*
 import kotlinx.android.synthetic.main.fragment_embed_text.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.nio.charset.StandardCharsets
 import java.security.spec.InvalidKeySpecException
+import java.time.Duration
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
@@ -92,7 +94,13 @@ class EmbedTextFragment : Fragment() {
                 InputMethodManager.HIDE_NOT_ALWAYS
             )//auto hide the keyboard
 
-            encode()
+            if (binding.vm?.password?.value == null) {
+                Log.e("EmbedTextFrag","${binding.vm?.password?.value}")
+                Snackbar.make(button_encode,"not ok", Snackbar.LENGTH_LONG).show()
+            } else {
+                encode()
+            }
+
             llProgressBar.visibility = View.VISIBLE
 //            button_share.visibility = View.VISIBLE;
 
@@ -128,20 +136,6 @@ class EmbedTextFragment : Fragment() {
             val out = requireContext().contentResolver.openOutputStream(uri)
             Log.e("EmbedTextFrag", "out")
 
-            if (msg == null) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    Log.e("EmbedTextFrag", "fail")
-                    requireActivity().runOnUiThread {
-                        Toast.makeText(
-                            activity,
-                            "Please select input message first",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-                return
-            }
-
             arguments?.let { value ->
                 val bitmap = value.get("coverImage") as Bitmap
                 Log.e("EmbedTextFrag", "imgURL = ${bitmap}")
@@ -155,7 +149,7 @@ class EmbedTextFragment : Fragment() {
                     Log.e("EmbedTextFrag", "call encoder")
                     jpegEncoder.Compress();
 
-                    Log.e("EmbedTextFrag", "encoded")
+                    Log.d("EmbedTextFrag", "encoded")
 
                     out?.close()
 

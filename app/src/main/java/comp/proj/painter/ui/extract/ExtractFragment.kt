@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import comp.proj.painter.R
 import comp.proj.painter.databinding.FragmentExtractBinding
 import comp.proj.painter.ui.code.ByteSource
@@ -55,12 +56,20 @@ class ExtractFragment : Fragment() {
 
         binding.buttonExtract.setOnClickListener {
 
-            CoroutineScope(Dispatchers.IO).launch {
-                val text = inputPassword()
-                decode()
+            binding.imageView.drawable.let { img ->
+                if (img == null) {
+                    Snackbar.make(
+                        button_extract, "PLease select image first",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                } else {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val text = inputPassword()
+                        decode()
+                    }
+                }
+
             }
-
-
         }
         return binding.root
     }
@@ -77,8 +86,6 @@ class ExtractFragment : Fragment() {
                 jpegDecode2.decode(ByteSource(requireContext(), Uri.parse(it)))
                 textChannel.send(jpegDecode2.getSecretText(pw))
             }
-
-
             //Log.d("Extract", "${jpegDecode2.decryptedText}")
         }
 

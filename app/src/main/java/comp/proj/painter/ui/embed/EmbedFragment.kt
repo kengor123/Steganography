@@ -68,41 +68,11 @@ class EmbedFragment : Fragment() {
             )
             startActivityForResult(mediaIntent, Code.IMAGE_RESULT)
         }
-
-//        binding.buttonEmbed.setOnClickListener {
-//            val strings = arrayOf("embed text")
-//
-//            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-//            builder.setSingleChoiceItems(strings, 0,
-//                DialogInterface.OnClickListener { dialog, which ->
-//                    when (which) {
-//                        0 -> {
-////                            text_embed.visibility = View.VISIBLE;
-////                            button_encode.visibility = View.VISIBLE;
-//                            binding.imageView.drawable.let { image ->
-//                                if (image == null) {
-//                                    Log.e("EmbedFrag", "image not exist")
-//                                } else {
-//                                    findNavController().navigate(
-//                                        R.id.action_navigation_embed_to_navigation_embed_text,
-//                                        bundleOf(Pair("coverImage", image.toBitmap()))
-//                                    )
-//                                    Log.e("EmbedFrag", "${image.toBitmap()}")
-//                                }
-//                            }
-//                            dialog.dismiss() //結束對話框
-//                        }
-//
-//                    }
-//
-//                })
-//            builder.show()
-//        }
         navToEmbedMsg()
         return binding.root
     }
 
-    fun navToEmbedMsg(){
+    private fun navToEmbedMsg(){
         binding.buttonEmbed.setOnClickListener {
             val imageNotFoundMsg = "Please select image first"
 

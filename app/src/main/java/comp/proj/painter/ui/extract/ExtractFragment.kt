@@ -64,7 +64,7 @@ class ExtractFragment : Fragment() {
                     ).show()
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val text = inputPassword()
+                        inputPassword()
                         decode()
                     }
                 }
@@ -78,18 +78,18 @@ class ExtractFragment : Fragment() {
 
         Log.e("Extract", "${binding.vm?.imageUrl?.value}")
 
-        val textChannel = Channel<String>()
+        val msgTextChannel = Channel<String>()
         val pw = binding.vm?.password?.value
         binding.vm?.imageUrl?.value?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 val jpegDecode2 = JpegDecoder()
                 jpegDecode2.decode(ByteSource(requireContext(), Uri.parse(it)))
-                textChannel.send(jpegDecode2.getSecretText(pw))
+                msgTextChannel.send(jpegDecode2.getSecretText(pw))
             }
             //Log.d("Extract", "${jpegDecode2.decryptedText}")
         }
 
-        MainScope().launch { text_extract.text = "The message is: \n ${textChannel.receive()}" }
+        MainScope().launch { text_extract.text = "The message is: \n ${msgTextChannel.receive()}" }
         //}
     }
 
@@ -97,18 +97,27 @@ class ExtractFragment : Fragment() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder.setTitle("Please Enter Password: ");
 
-        val textChannel = Channel<String>()
+        val passwordTextChannel = Channel<String>()
 
-        val input: EditText = EditText(context);
+        val input = EditText(context);
         input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         builder.setView(input)
+
+        Log.d("Extract", input.text.toString())
 
         builder.setPositiveButton(
             "OK"
         ) { dialog, which ->
             MainScope().launch {
                 binding.vm?.password?.value = input.text.toString()
-                textChannel.send(input.text.toString())
+
+//                if (input.text.toString() == "") {
+////                    binding.vm?.password?.value = ""
+////                } else {
+////                    binding.vm?.password?.value = input.text.toString()
+////                }
+//                    binding.vm?.password?.value  = if(input.text.toString() == "") "" else input.text.toString()
+                passwordTextChannel.send(input.text.toString())
             }
         }
         builder.setNegativeButton(
@@ -117,7 +126,7 @@ class ExtractFragment : Fragment() {
 
         builder.show()
 
-        textChannel.receive()
+        passwordTextChannel.receive()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

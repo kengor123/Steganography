@@ -94,15 +94,17 @@ class EmbedTextFragment : Fragment() {
                 InputMethodManager.HIDE_NOT_ALWAYS
             )//auto hide the keyboard
 
-            if (binding.vm?.password?.value == null) {
-                Log.e("EmbedTextFrag","${binding.vm?.password?.value}")
-                Snackbar.make(button_encode,"not ok", Snackbar.LENGTH_LONG).show()
+            if (binding.vm?.password?.value == "") {
+                Log.e("EmbedTextFrag", "${binding.vm?.password?.value}")
+                Snackbar.make(
+                    button_submit,
+                    "Please input password for security",
+                    Snackbar.LENGTH_LONG
+                ).show()
             } else {
                 encode()
+                llProgressBar.visibility = View.VISIBLE
             }
-
-            llProgressBar.visibility = View.VISIBLE
-//            button_share.visibility = View.VISIBLE;
 
         }
 
@@ -115,9 +117,7 @@ class EmbedTextFragment : Fragment() {
             waitChannel.receive()
             binding.buttonShare.visibility = View.VISIBLE
             llProgressBar.visibility = View.GONE
-            //Log.d("EmbedTextFrag", "toast")
             Snackbar.make(binding.buttonSubmit, "DONE", Snackbar.LENGTH_LONG).show()
-            //Toast.makeText(requireContext(), "DONE", Toast.LENGTH_LONG).show()
         }
 
         return binding.root
@@ -139,8 +139,9 @@ class EmbedTextFragment : Fragment() {
             arguments?.let { value ->
                 val bitmap = value.get("coverImage") as Bitmap
                 Log.e("EmbedTextFrag", "imgURL = ${bitmap}")
-                Log.e("EmbedTextFrag", "${binding.coverImage.drawable}")
+                // Log.e("EmbedTextFrag", "${binding.coverImage.drawable}")
 
+                Log.e("EmbedTextFrag", "password = ${binding.vm?.password}")
                 CoroutineScope(Dispatchers.IO).launch {
                     val jpegEncoder = JpegEncoder(
                         bitmap, 90, out, msg?.let { encryptedString(it) }
@@ -165,10 +166,7 @@ class EmbedTextFragment : Fragment() {
 //                        startActivity(Intent.createChooser(shareIntent, "Share Image"))
 
                 }
-
             }
-
-
         }
 
         shareUri = uri
@@ -216,60 +214,32 @@ class EmbedTextFragment : Fragment() {
         }
     }
 
-    fun checkPermission(): Boolean {
-        return (ActivityCompat.checkSelfPermission(
-            requireContext(),
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED
-                )
-    }
-
     private fun encryptedString(msgToEncrypt: String): String {
         binding.vm?.password?.value.let { pw ->
-            try {
-                val salt = ByteArray(256)
-                salt.fill(0);
+            val salt = ByteArray(256)
+            salt.fill(0);
 
-                val password = pw?.toCharArray()
+            val password = pw?.toCharArray()
 
-                val pbKeySpec = PBEKeySpec(password, salt, 1324, 256) // 1
-                val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1") // 2
-                val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded // 3
-                val keySpec = SecretKeySpec(keyBytes, "AES") // 4
+            val pbKeySpec = PBEKeySpec(password, salt, 1324, 256) // 1
+            val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1") // 2
+            val keyBytes = secretKeyFactory.generateSecret(pbKeySpec).encoded // 3
+            val keySpec = SecretKeySpec(keyBytes, "AES") // 4
 
-                val iv = ByteArray(16)
-                iv.fill(1)
-                val ivSpec = IvParameterSpec(iv) // 2
+            val iv = ByteArray(16)
+            iv.fill(1)
+            val ivSpec = IvParameterSpec(iv) // 2
 
-                val data: ByteArray = msgToEncrypt.toByteArray(StandardCharsets.UTF_8)
+            val data: ByteArray = msgToEncrypt.toByteArray(StandardCharsets.UTF_8)
 
-                val cipher = Cipher.getInstance("AES/CTR/NoPadding") // 1
-                cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
-                val encrypted = cipher.doFinal(data) // 2
+            val cipher = Cipher.getInstance("AES/CTR/NoPadding") // 1
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec)
+            val encrypted = cipher.doFinal(data) // 2
 
-                val base64: String = Base64.encodeToString(encrypted, Base64.DEFAULT)
+            val base64: String = Base64.encodeToString(encrypted, Base64.DEFAULT)
 
-                Log.e("Encrypt", "${base64}")
-                return base64
-            } catch (e: InvalidKeySpecException) {
-
-                requireActivity().runOnUiThread {
-                    Toast.makeText(
-                        activity,
-                        "Please select cover image first",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                val builder = AlertDialog.Builder(context)
-
-                val alertDialog = builder.create()
-                alertDialog.show()
-            }
-            return "";
+            Log.e("Encrypt", "${base64}")
+            return base64
         }
     }
 
